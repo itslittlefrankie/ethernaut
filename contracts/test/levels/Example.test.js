@@ -1,6 +1,6 @@
 const KingFactory = artifacts.require('./levels/ExampleFactory.sol')
 const King = artifacts.require('./attacks/Example.sol')
-const KingAttack = artifacts.require('./attacks/KingAttack.sol')
+const KingAttack = artifacts.require('./attacks/ExampleAttack.sol')
 
 const Ethernaut = artifacts.require('./Ethernaut.sol')
 const { BN, constants, expectEvent, expectRevert } = require('openzeppelin-test-helpers')
@@ -16,7 +16,7 @@ contract('Example', function(accounts) {
 
   before(async function() {
     ethernaut = await Ethernaut.new();
-    level = await KingFactory.new()
+    level = await ExampleFactory.new()
     await ethernaut.registerLevel(level.address)
   });
 
