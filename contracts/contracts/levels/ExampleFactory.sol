@@ -4,7 +4,7 @@ pragma solidity ^0.6.0;
 import './base/Level.sol';
 import './Example.sol';
 
-contract DummyLevel is Level {
+contract ExampleFactory is Level {
   uint public insertCoin = 0.001 ether;
 
   function createInstance(address _player) override public payable returns (address) {
