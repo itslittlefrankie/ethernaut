@@ -1,4 +1,4 @@
-const KingFactory = artifacts.require('./levels/ExampleFactory.sol')
+const ExampleFactory = artifacts.require('./levels/ExampleFactory.sol')
 const King = artifacts.require('./attacks/Example.sol')
 const KingAttack = artifacts.require('./attacks/ExampleAttack.sol')
 
