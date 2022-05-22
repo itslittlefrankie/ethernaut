@@ -12,7 +12,6 @@
     "ethereumjs-util": "^7.0.10",
     "hardhat": "^2.9.2",
     "openzeppelin-test-helpers": "^0.5.1",
-    "openzeppelin4": "npm:@openzeppelin/contracts@^4.6.0",
     "prompt": "^1.1.0",
     "web3": "^1.3.5"
   },
