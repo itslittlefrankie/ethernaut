@@ -375,7 +375,21 @@
       "instanceGas": 3600000,
       "author": "openzeppelin"
     },
-    
+    {
+      "name": "Motorbike",
+      "created": "2021-10-07",
+      "difficulty": "6",
+      "description": "motorbike.md",
+      "completedDescription": "motorbike_complete.md",
+      "levelContract": "MotorbikeFactory.sol",
+      "instanceContract": "Motorbike.sol",
+      "revealCode": true,
+      "deployParams": [],
+      "deployFunds": 0,
+      "deployId": "25",
+      "instanceGas": 5000000,
+      "author": "openzeppelin"
+    },
     {
       "name": "DoubleEntryPoint",
       "created": "2022-03-21",
@@ -387,7 +401,7 @@
       "revealCode": true,
       "deployParams": [],
       "deployFunds": 0,
-      "deployId": "25",
+      "deployId": "26",
       "instanceGas": 5000000,
       "poweredBy": {"src": "../../imgs/forta_black.svg", "href": "https://forta.org"},
       "author": "openzeppelin&forta"
@@ -402,7 +416,7 @@
       "revealCode": true,
       "deployParams": [],
       "deployFunds": 0,
-      "deployId": "26",
+      "deployId": "27",
       "instanceGas": 11000000,
       "author": "itslittlefrankie"
     }
