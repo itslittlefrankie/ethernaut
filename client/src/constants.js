@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import pkgWeb3 from 'web3';
-import * as pkgJSON from '../package.json' //assert {type: 'json'};
+import * as pkgJSON from '../package.json';
 dotenv.config()
 
 export const DEBUG = process.env.NODE_ENV !== 'production'
@@ -63,7 +63,7 @@ export const CUSTOM_LOGGING = true                              /* TRUE on produ
 export const SHOW_ALL_COMPLETE_DESCRIPTIONS = false             /* FALSE on production */
 export const SHOW_VERSION = true                                /* TRUE on production */
 // export const ACTIVE_NETWORK = NETWORKS.ROPSTEN
-export const ACTIVE_NETWORK = NETWORKS.LOCAL
+export const ACTIVE_NETWORK = NETWORKS.RINKEBY
 // export const ACTIVE_NETWORK = NETWORKS.LOCAL
 // -----------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------
