@@ -7,14 +7,15 @@ import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
 import '../levels/PriceIt.sol';
 
 contract PriceItAttack {
-  IUniswapV2Factory public uniFactory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
-  IUniswapV2Router02 public uniRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-  IERC20 token0;
-  IERC20 token1;
-  IERC20 token2;
-  IUniswapV2Pair token0Token2Pair;
-  PriceIt level;
-  uint256 public amount = 50000 ether;
+  IUniswapV2Factory private uniFactory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
+  IUniswapV2Router02 private uniRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+  IERC20 private token0;
+  IERC20 private token1;
+  IERC20 private token2;
+  IUniswapV2Pair private token0Token2Pair;
+  PriceIt private level;
+  uint256 private amount = 50000 ether;
+  address private attacker;
 
   function doYourThing(PriceIt _level) external {
     level = _level;
